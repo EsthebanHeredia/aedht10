@@ -1,29 +1,30 @@
-# Importa la clase Grafo y las funciones del algoritmo de Floyd-Warshall.
+# Programa principal para gestionar rutas entre ciudades con diferentes condiciones climáticas
 from grafo import Grafo
 from floyd import floyd_warshall, reconstruir_camino
+from centro import calcular_centro
 
-# Muestra el menú de opciones.
 def mostrar_menu():
+    # Muestra las opciones disponibles para el usuario
     print("\n1. Ruta más corta entre ciudades")
     print("2. Mostrar ciudad centro del grafo")
     print("3. Modificar el grafo")
     print("4. Salir")
 
-# Función principal del programa.
 def main():
+    # Inicialización del grafo y carga de datos
     grafo = Grafo()
     grafo.cargar_desde_archivo("logistica.txt")
+    grafo.cargar_todas_las_matrices("logistica.txt")  # Inicializa matrices para cada clima
     matriz = grafo.obtener_matriz()
     ciudades = grafo.obtener_ciudades()
-    # Calcula las distancias más cortas y los nodos siguientes.
     dist, next_node = floyd_warshall(matriz)
 
     while True:
         mostrar_menu()
         opcion = input("Seleccione una opción: ")
 
-        # Opción 1: Ruta más corta.
         if opcion == '1':
+            # Cálculo de la ruta más corta entre dos ciudades
             origen = input("Ciudad origen: ")
             destino = input("Ciudad destino: ")
 
@@ -40,18 +41,47 @@ def main():
                 print(" -> ".join(ciudades[k] for k in camino))
                 print(f"Distancia total: {dist[i][j]}")
 
-        # Opción 2: Centro del grafo.
-
         elif opcion == '2':
-            print("Haz seleccionado la opción 2.")
-
-        # Opción 3: Modificar el grafo.
+            # Identificación del centro del grafo
+            centro_idx = calcular_centro(dist)
+            print(f"Centro del grafo: {ciudades[centro_idx]}")
 
         elif opcion == '3':
-            print("Haz seleccionado la opción 3.")
+            # Módulo de modificación del grafo
+            print("a) Eliminar conexión")
+            print("b) Agregar conexión")
+            print("c) Cambiar clima")
+            subop = input("Seleccione subopción: ")
 
-        # Opción 4: Salir.
+            if subop == 'a':
+                # Eliminar una conexión existente
+                c1 = input("Ciudad origen: ")
+                c2 = input("Ciudad destino: ")
+                grafo.eliminar_conexion(c1, c2)
+                matriz = grafo.obtener_matriz_por_clima("normal")
+                dist, next_node = floyd_warshall(matriz)
+
+            elif subop == 'b':
+                # Agregar una nueva conexión
+                c1 = input("Ciudad origen: ")
+                c2 = input("Ciudad destino: ")
+                tiempos = []
+                for clima in ["normal", "lluvia", "nieve", "tormenta"]:
+                    t = int(input(f"Tiempo en {clima}: "))
+                    tiempos.append(t)
+                grafo.agregar_conexion(c1, c2, tiempos)
+                matriz = grafo.obtener_matriz_por_clima("normal")
+                dist, next_node = floyd_warshall(matriz)
+
+            elif subop == 'c':
+                # Cambiar el clima actual y recalcular rutas
+                clima = input("Ingrese clima (normal, lluvia, nieve, tormenta): ").lower()
+                matriz = grafo.obtener_matriz_por_clima(clima)
+                dist, next_node = floyd_warshall(matriz)
+                print(f"Clima cambiado a {clima}. Rutas recalculadas.")
+
         elif opcion == '4':
+            # Salir del programa
             break
 
         else:

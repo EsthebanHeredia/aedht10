@@ -2,7 +2,7 @@
 import sys
 import os
 
-# Añade el directorio padre al path de Python
+# Añade el directorio padre al path para poder importar módulos
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from grafo import Grafo
@@ -10,17 +10,21 @@ from floyd import floyd_warshall
 
 # Define una función de prueba para un caso simple del algoritmo de Floyd-Warshall.
 def test_floyd_simple():
+    # Prueba el algoritmo de Floyd-Warshall con un grafo pequeño y simple
     g = Grafo()
     g.ciudades = ["A", "B", "C"]
     g.indices = {"A":0, "B":1, "C":2}
-    # Matriz de adyacencia: 1000 representa infinito.
+    
+    # Matriz de adyacencia donde 1000 representa "no hay conexión directa"
     g.matriz = [
         [0, 5, 1000],
         [1000, 0, 3],
         [1, 1000, 0]
     ]
+    
     dist, _ = floyd_warshall(g.matriz)
-    # Comprueba la distancia más corta de A a C (A -> B -> C = 5 + 3 = 8).
+    
+    # Verifica que la distancia de A a C sea correcta (debe ser A→C = 8)
     assert dist[0][2] == 8
     return True
 
